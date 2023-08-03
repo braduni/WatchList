@@ -24,6 +24,7 @@ namespace WatchList.Controllers
         public async Task<ActionResult<Movie>> GetBookById(int id)
         {
             var result = await _movieService.GetMovieById(id);
+            if (result == null) { return NotFound(); }
             return Ok(result);
         }
 
@@ -38,8 +39,15 @@ namespace WatchList.Controllers
         public async Task<ActionResult<List<Movie>>> UpdateMovie(int id, Movie movie)
         {
             var result = await _movieService.UpdateMovie(id, movie);
+            if (result == null) { return NotFound(); }
             return Ok(result);
         }
-
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<List<Movie>>> DeleteMovie(int id)
+        {
+            var result = await _movieService.DeleteMovie(id);
+            if (result == null) { return NotFound(); };
+            return Ok(result);
+        }
     }
 }

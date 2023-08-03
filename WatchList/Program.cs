@@ -1,12 +1,15 @@
 global using Microsoft.EntityFrameworkCore;
 global using WatchList.Models;
 global using WatchList.Data;
+using WatchList.Services.MovieService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IMovieService, MovieService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
