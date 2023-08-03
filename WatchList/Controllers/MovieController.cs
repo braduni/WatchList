@@ -4,7 +4,7 @@ using WatchList.Services.MovieService;
 
 namespace WatchList.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class MovieController : ControllerBase
     {
@@ -21,7 +21,7 @@ namespace WatchList.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Movie>> GetBookById(int id)
+        public async Task<ActionResult<Movie>> GetMovieById(int id)
         {
             var result = await _movieService.GetMovieById(id);
             if (result == null) { return NotFound(); }
