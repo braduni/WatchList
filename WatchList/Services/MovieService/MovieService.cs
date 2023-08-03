@@ -2,29 +2,51 @@
 {
     public class MovieService : IMovieService
     {
-        public Task<List<Movie>> AddMovie(Movie request)
+        private readonly DataContext _context;
+        public MovieService(DataContext context)
         {
-            throw new NotImplementedException();
+            _context = context;       
+        }
+        public async Task<List<Movie>> AddMovie(Movie request)
+        {
+            _context.Movies.Add(request);
+            await _context.SaveChangesAsync();
+            return await _context.Movies.ToListAsync();
         }
 
-        public Task<List<Movie>?> DeleteMovie(int id)
+        public async Task<List<Movie>?> DeleteMovie(int id)
         {
-            throw new NotImplementedException();
+            var movie = await _context.Movies.FindAsync(id);
+            if (movie == null) { return null; }
+            _context.Movies.Remove(movie);
+            await _context.SaveChangesAsync();
+            return await _context.Movies.ToListAsync();
         }
 
-        public Task<List<Movie>> GetAllMovies()
+        public async Task<List<Movie>> GetAllMovies()
         {
-            throw new NotImplementedException();
+            var movies = await _context.Movies.ToListAsync();
+            return movies;
         }
 
-        public Task<Movie?> GetMovieById(int id)
+        public async Task<Movie?> GetMovieById(int id)
         {
-            throw new NotImplementedException();
+            var movie = await _context.Movies.FindAsync(id);
+            if (movie == null) { return null; }
+            return movie;
         }
 
-        public Task<List<Movie>?> UpdateMovie(int id, Movie request)
+        public async Task<List<Movie>?> UpdateMovie(int id, Movie request)
         {
-            throw new NotImplementedException();
+            var movie = await _context.Movies.FindAsync(id);
+            if (movie == null) { return null; }
+
+            movie.Title = request.Title;
+            movie.Genre = request.Genre;
+            movie.Director = request.Director;
+            
+            await _context.SaveChangesAsync();
+            return await _context.Movies.ToListAsync();     
         }
     }
 }

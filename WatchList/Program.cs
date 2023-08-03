@@ -1,6 +1,6 @@
 global using Microsoft.EntityFrameworkCore;
 global using WatchList.Models;
-using WatchList.Data;
+global using WatchList.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
