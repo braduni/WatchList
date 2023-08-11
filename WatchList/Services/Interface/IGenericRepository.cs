@@ -2,7 +2,7 @@
 
 namespace WatchList.Services.Repository
 {
-    public interface IGenericRepository<T> where T : class
+    public interface IGenericRepository<T> 
     {
         IQueryable<T> FindAll();
         IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression);

@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using WatchList.Services.MovieService;
+﻿using Microsoft.AspNetCore.Mvc;
+using WatchList.Services.Repository;
 
 namespace WatchList.Controllers
 {
@@ -8,46 +7,109 @@ namespace WatchList.Controllers
     [ApiController]
     public class MovieController : ControllerBase
     {
-        private readonly IMovieService _movieService;
-        public MovieController(IMovieService movieService)
+        private readonly IUnitOfWork _unitOfWork;
+        public MovieController(IUnitOfWork unitOfWork)
         {
-            _movieService = movieService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Movie>>> GetAllMovies()
+        public async Task<IActionResult> GetAllMovies()
         {
-            return await _movieService.GetAllMovies();
+            try
+            {
+                var movies = await _unitOfWork.MovieRepository.GetAllAsync();
+                return Ok(movies);
+                
+            }catch (Exception ex) 
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Movie>> GetMovieById(int id)
+        public async Task<IActionResult> GetMovieById(int id)
         {
-            var result = await _movieService.GetMovieById(id);
-            if (result == null) { return NotFound(); }
-            return Ok(result);
+            try
+            {
+                var movie = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
+
+                if (movie == null)
+                {
+                    return NotFound();
+                }
+                else 
+                {
+                    return Ok(movie);
+                }
+                
+            }catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<Movie>>> AddMovie(Movie movie)
+        public async Task<IActionResult> AddMovie([FromBody] Movie request)
         {
-            var result = await _movieService.AddMovie(movie);
-            return Ok(result);
+            try 
+            {
+                _unitOfWork.MovieRepository.Create(request);
+                await _unitOfWork.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetMovieById), new { id = request.Id }, request);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, ex.Message);
+            }          
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<List<Movie>>> UpdateMovie(int id, Movie movie)
+        public async Task<IActionResult> UpdateMovie(int id, [FromBody] Movie request)
         {
-            var result = await _movieService.UpdateMovie(id, movie);
-            if (result == null) { return NotFound(); }
-            return Ok(result);
+            try 
+            {
+                var movie = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
+
+                if (movie == null)
+                {
+                    return NotFound();
+                }
+
+                movie.Title = request.Title;
+                movie.Director = request.Director;
+                movie.Genres = request.Genres;
+
+                _unitOfWork.MovieRepository.Update(movie);
+                await _unitOfWork.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
+
         [HttpDelete("{id}")]
-        public async Task<ActionResult<List<Movie>>> DeleteMovie(int id)
+        public async Task<IActionResult> RemoveMovie(int id)
         {
-            var result = await _movieService.DeleteMovie(id);
-            if (result == null) { return NotFound(); };
-            return Ok(result);
+            try
+            {
+                var movie = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
+
+                if (movie == null)
+                {
+                    return NotFound();
+                }
+
+                _unitOfWork.MovieRepository.Delete(movie);
+                await _unitOfWork.SaveChangesAsync();     
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }
