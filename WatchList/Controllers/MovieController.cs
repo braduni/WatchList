@@ -20,7 +20,7 @@ namespace WatchList.Controllers
         {
             try
             {
-                var movies = await _unitOfWork.MovieRepository.GetAllAsync();
+                var movies = await _unitOfWork.MovieRepository.GetAllMoviesAsync();
                 return Ok(movies);
             }
             catch (Exception ex) 
@@ -149,8 +149,8 @@ namespace WatchList.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMoviesByGenres(IEnumerable<string> genres)
+        [HttpGet("by-genres")]
+        public async Task<IActionResult> GetMoviesByGenres([FromQuery] IEnumerable<string> genres)
         {
             if (genres == null || !genres.Any())
             {

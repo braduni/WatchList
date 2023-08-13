@@ -5,8 +5,8 @@ namespace WatchList.Services.Repository
 {
     public interface IMovieRepository : IGenericRepository<Movie>
     {
-        Task<IEnumerable<MovieDto>> GetAllAsync();
+        Task<IEnumerable<MovieDto>> GetAllMoviesAsync();
         Task<Movie?> GetMovieByIdAsync(int id);
-        Task<IEnumerable<MovieDto>> GetMoviesByGenresAsync(IEnumerable<string> genres);
+        Task<IEnumerable<MovieDtoWithoutGenres>> GetMoviesByGenresAsync(IEnumerable<string> genres);
     }
 }

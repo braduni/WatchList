@@ -1,4 +1,5 @@
-﻿using WatchList.Models.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
+using WatchList.Models.Domain;
 using WatchList.Models.Dtos;
 using WatchList.Services.Repository;
 
@@ -10,7 +11,7 @@ namespace WatchList.Services.Implementation
         {
         }
 
-        public async Task<IEnumerable<MovieDto>> GetAllAsync()
+        public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync()
         {
             var movies = await FindAll()
                 .Include(movie => movie.Genres)
@@ -30,18 +31,18 @@ namespace WatchList.Services.Implementation
             });
         }
 
-        public async Task<IEnumerable<MovieDto>> GetMoviesByGenresAsync(IEnumerable<string> genres) 
+        public async Task<IEnumerable<MovieDtoWithoutGenres>> GetMoviesByGenresAsync([FromQuery] IEnumerable<string> genres) 
         {
             var movies = await FindAll()
-                .Where(movie => movie.Genres.Any(g => genres.Contains(g.Name)))
-                .Select(movie => new MovieDto
-                {
-                    Id = movie.Id,
-                    Title = movie.Title,
-                    Director = movie.Director
-                })
-                .ToListAsync();
-            
+               .Where(movie => movie.Genres.Any(g => genres.Contains(g.Name)))
+               .Select(movie => new MovieDtoWithoutGenres
+               {
+                   Id = movie.Id,
+                   Title = movie.Title,
+                   Director = movie.Director
+               })
+               .ToListAsync();
+
             return movies;
         }
 
