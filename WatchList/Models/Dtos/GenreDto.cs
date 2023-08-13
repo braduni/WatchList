@@ -1,9 +1,8 @@
-﻿namespace WatchList.Models
+﻿namespace WatchList.Models.Dtos
 {
-    public class Genre
+    public class GenreDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public List<Movie>? Movies { get; set; }
     }
 }

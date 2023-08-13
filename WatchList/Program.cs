@@ -1,8 +1,8 @@
 global using Microsoft.EntityFrameworkCore;
-global using WatchList.Models;
 global using WatchList.Data;
 using WatchList.Services.Repository;
 using WatchList.Services.Implementation;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +12,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 //builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

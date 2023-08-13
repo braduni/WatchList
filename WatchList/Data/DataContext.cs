@@ -1,4 +1,6 @@
-﻿namespace WatchList.Data
+﻿using WatchList.Models.Domain;
+
+namespace WatchList.Data
 {
     public class DataContext : DbContext
     {

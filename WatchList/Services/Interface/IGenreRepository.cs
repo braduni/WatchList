@@ -1,8 +1,11 @@
-﻿namespace WatchList.Services.Repository
+﻿using WatchList.Models.Domain;
+using WatchList.Models.Dtos;
+
+namespace WatchList.Services.Repository
 {
     public interface IGenreRepository : IGenericRepository<Genre>
     {
-        Task<IEnumerable<Genre>> GetAllAsync();
-        Task<Genre> GetGenreByIdAsync(int id);
+        Task<IEnumerable<GenreDto>> GetAllAsync();
+        Task<Genre?> GetGenreByIdAsync(int id);
     }
 }
