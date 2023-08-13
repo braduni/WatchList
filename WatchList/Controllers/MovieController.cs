@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WatchList.Models.Domain;
+using WatchList.Models.Dtos;
 using WatchList.Services.Repository;
 
 namespace WatchList.Controllers
@@ -20,8 +22,8 @@ namespace WatchList.Controllers
             {
                 var movies = await _unitOfWork.MovieRepository.GetAllAsync();
                 return Ok(movies);
-                
-            }catch (Exception ex) 
+            }
+            catch (Exception ex) 
             {
                 return StatusCode(500, ex.Message);
             }
@@ -32,14 +34,22 @@ namespace WatchList.Controllers
         {
             try
             {
-                var movie = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
+                var result = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
 
-                if (movie == null)
+                if (result == null)
                 {
                     return NotFound();
                 }
-                else 
+                else
                 {
+                    var movie = new MovieDto 
+                    {
+                        Id = result.Id,
+                        Title = result.Title,
+                        Director = result.Director,
+                        Genres = result.Genres?.Select(g => g.Name).ToList() ?? new List<string>()
+                    };   
+                    
                     return Ok(movie);
                 }
                 
@@ -50,13 +60,28 @@ namespace WatchList.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddMovie([FromBody] Movie request)
+        public async Task<IActionResult> AddMovie([FromBody] AddMovieDto request)
         {
             try 
             {
-                _unitOfWork.MovieRepository.Create(request);
+                if (!ModelState.IsValid) 
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var movie = new Movie
+                {
+                    Title = request.Title,
+                    Director = request.Director,
+                    Genres = _unitOfWork.GenreRepository
+                    .FindByCondition(g => request.Genres.Contains(g.Name))
+                    .ToList()
+                };
+          
+                _unitOfWork.MovieRepository.Create(movie);
                 await _unitOfWork.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetMovieById), new { id = request.Id }, request);
+
+                return CreatedAtAction(nameof(GetMovieById), new { id = movie.Id }, movie);
             }
             catch (Exception ex) 
             {
@@ -65,23 +90,34 @@ namespace WatchList.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMovie(int id, [FromBody] Movie request)
+        public async Task<IActionResult> UpdateMovie(int id, [FromBody] AddMovieDto request)
         {
             try 
             {
-                var movie = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-                if (movie == null)
+                var movieToUpdate = await _unitOfWork.MovieRepository.GetMovieByIdAsync(id);
+
+                if (movieToUpdate == null)
                 {
                     return NotFound();
                 }
 
-                movie.Title = request.Title;
-                movie.Director = request.Director;
-                movie.Genres = request.Genres;
+                movieToUpdate.Title = request.Title;
+                movieToUpdate.Director = request.Director;
 
-                _unitOfWork.MovieRepository.Update(movie);
+                var genreToUpdate = _unitOfWork.GenreRepository
+                    .FindByCondition(g => request.Genres.Contains(g.Name))
+                    .ToList();
+
+                movieToUpdate.Genres = genreToUpdate;
+
+                _unitOfWork.MovieRepository.Update(movieToUpdate);
                 await _unitOfWork.SaveChangesAsync();
+
                 return NoContent();
             }
             catch (Exception ex) 
@@ -91,7 +127,7 @@ namespace WatchList.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> RemoveMovie(int id)
+        public async Task<IActionResult> DeleteMovie(int id)
         {
             try
             {
@@ -103,13 +139,33 @@ namespace WatchList.Controllers
                 }
 
                 _unitOfWork.MovieRepository.Delete(movie);
-                await _unitOfWork.SaveChangesAsync();     
+                await _unitOfWork.SaveChangesAsync();  
+                
                 return NoContent();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMoviesByGenres(IEnumerable<string> genres)
+        {
+            if (genres == null || !genres.Any())
+            {
+                return BadRequest("At least one genre must be provided.");
+            }
+            
+            try
+            {
+                var moviesByGenres = await _unitOfWork.MovieRepository.GetMoviesByGenresAsync(genres);
+                return Ok(moviesByGenres);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, ex.Message);
+            }   
         }
     }
 }

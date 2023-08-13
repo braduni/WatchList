@@ -17,7 +17,8 @@ namespace WatchList.Services.Implementation
         }
         public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression)
         {
-            return _context.Set<T>().Where(expression).AsNoTracking();
+            return _context.Set<T>().Where(expression);
+            //return _context.Set<T>().Where(expression).AsNoTracking();
         }
         public void Create(T entity)
         {

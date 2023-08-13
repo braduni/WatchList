@@ -1,4 +1,6 @@
-﻿using WatchList.Services.Repository;
+﻿using WatchList.Models.Domain;
+using WatchList.Models.Dtos;
+using WatchList.Services.Repository;
 
 namespace WatchList.Services.Implementation
 {
@@ -8,20 +10,48 @@ namespace WatchList.Services.Implementation
         {
         }
 
-        public async Task<IEnumerable<Movie>> GetAllAsync()
+        public async Task<IEnumerable<MovieDto>> GetAllAsync()
         {
-            return await FindAll().ToListAsync();
+            var movies = await FindAll()
+                .Include(movie => movie.Genres)
+                .ToListAsync();
+
+            if (!movies.Any())
+            { 
+                return Enumerable.Empty<MovieDto>(); 
+            }
+
+            return movies.Select(movie => new MovieDto
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Director = movie.Director,
+                Genres = movie.Genres.Select(g => g.Name).ToList() ?? new List<string>()
+            });
         }
 
-        public Task<IEnumerable<Movie>> GetAllMoviesByGenreAsync(string genre)
+        public async Task<IEnumerable<MovieDto>> GetMoviesByGenresAsync(IEnumerable<string> genres) 
         {
-            throw new NotImplementedException();
+            var movies = await FindAll()
+                .Where(movie => movie.Genres.Any(g => genres.Contains(g.Name)))
+                .Select(movie => new MovieDto
+                {
+                    Id = movie.Id,
+                    Title = movie.Title,
+                    Director = movie.Director
+                })
+                .ToListAsync();
+            
+            return movies;
         }
 
-        public async Task<Movie> GetMovieByIdAsync(int id)
+        public async Task<Movie?> GetMovieByIdAsync(int id)
         {
-            return await FindByCondition(movie => movie.Id.Equals(id)).FirstOrDefaultAsync();
-        }
+            var movie = await FindByCondition(movie => movie.Id.Equals(id))
+                .Include(movie => movie.Genres)
+                .SingleOrDefaultAsync();
 
+            return movie;
+        }
     }
 }
