@@ -34,16 +34,20 @@ namespace WatchList.Services.Implementation
         public async Task<IEnumerable<MovieDtoWithoutGenres>> GetMoviesByGenresAsync([FromQuery] IEnumerable<string> genres) 
         {
             var movies = await FindAll()
-               .Where(movie => movie.Genres.Any(g => genres.Contains(g.Name)))
-               .Select(movie => new MovieDtoWithoutGenres
-               {
-                   Id = movie.Id,
-                   Title = movie.Title,
-                   Director = movie.Director
-               })
-               .ToListAsync();
+                .Include(movie => movie.Genres)
+                .ToListAsync();
 
-            return movies;
+            var filteredMovies = movies
+                .Where(movie => genres.All(desiredGenre => movie.Genres.Any(movieGenre => movieGenre.Name == desiredGenre)))
+                .Select(movie => new MovieDtoWithoutGenres
+                {
+                    Id = movie.Id,
+                    Title = movie.Title,
+                    Director = movie.Director
+                })
+                .ToList();
+
+            return filteredMovies;
         }
 
         public async Task<Movie?> GetMovieByIdAsync(int id)
