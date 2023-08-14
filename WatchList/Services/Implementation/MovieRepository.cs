@@ -54,5 +54,10 @@ namespace WatchList.Services.Implementation
 
             return movie;
         }
+
+        public async Task<Movie?> GetMovieByTitleAsync(string name)
+        {
+            return await FindByCondition(movie => movie.Title.Equals(name)).FirstOrDefaultAsync();
+        }
     }
 }

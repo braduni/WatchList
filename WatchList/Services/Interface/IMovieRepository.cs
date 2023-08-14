@@ -8,5 +8,7 @@ namespace WatchList.Services.Repository
         Task<IEnumerable<MovieDto>> GetAllMoviesAsync();
         Task<Movie?> GetMovieByIdAsync(int id);
         Task<IEnumerable<MovieDtoWithoutGenres>> GetMoviesByGenresAsync(IEnumerable<string> genres);
+
+        Task<Movie?> GetMovieByTitleAsync(string title);
     }
 }

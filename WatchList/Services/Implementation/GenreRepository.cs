@@ -28,5 +28,10 @@ namespace WatchList.Services.Implementation
         {
             return await FindByCondition(genre => genre.Id.Equals(id)).FirstOrDefaultAsync();
         }
+
+        public async Task<Genre?> GetGenreByNameAsync(string name)
+        {
+            return await FindByCondition(genre => genre.Name.Equals(name)).FirstOrDefaultAsync();
+        }
     }
 }

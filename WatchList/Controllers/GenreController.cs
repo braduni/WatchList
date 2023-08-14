@@ -68,6 +68,14 @@ namespace WatchList.Controllers
                 {
                     return BadRequest(ModelState);
                 }
+
+                var existingGenre = await _unitOfWork.GenreRepository.GetGenreByNameAsync(request.Name);
+
+                if (existingGenre != null)
+                {
+                    return BadRequest($"Genre '{request.Name}' already exists. Existing genre details: Id = {existingGenre.Id}, Name = {existingGenre.Name}");
+                }
+
                 var genre = new Genre
                 {
                     Name = request.Name

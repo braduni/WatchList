@@ -69,6 +69,13 @@ namespace WatchList.Controllers
                     return BadRequest(ModelState);
                 }
 
+                var existingMovie = await _unitOfWork.MovieRepository.GetMovieByTitleAsync(request.Title);
+
+                if (existingMovie != null)
+                {
+                    return BadRequest($"Movie '{request.Title}' already exists. Existing movie details: Id = {existingMovie.Id}, Title = {existingMovie.Title}");
+                }
+
                 var movie = new Movie
                 {
                     Title = request.Title,

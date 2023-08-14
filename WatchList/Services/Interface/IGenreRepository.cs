@@ -7,5 +7,7 @@ namespace WatchList.Services.Repository
     {
         Task<IEnumerable<GenreDto>> GetAllAsync();
         Task<Genre?> GetGenreByIdAsync(int id);
+
+        Task<Genre?> GetGenreByNameAsync(string name);
     }
 }
